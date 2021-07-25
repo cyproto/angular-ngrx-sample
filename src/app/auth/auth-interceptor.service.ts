@@ -11,7 +11,6 @@ import { AuthService } from "./auth.service";
 import { Store } from "@ngrx/store";
 
 import * as fromApp from "../store/app.reducer";
-import * as fromAuthActions from "../auth/store/auth.actions";
 
 @Injectable()
 export class AuthInterceptorService implements HttpInterceptor {
