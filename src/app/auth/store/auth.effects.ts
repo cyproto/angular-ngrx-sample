@@ -5,6 +5,7 @@ import { Actions, createEffect, Effect, ofType } from "@ngrx/effects";
 import { of } from "rxjs";
 import { catchError, map, switchMap, tap } from "rxjs/operators";
 import { environment } from "src/environments/environment";
+import { AuthService } from "../auth.service";
 import { User } from "../user.model";
 
 import * as AuthActions from "./auth.actions";
@@ -75,6 +76,9 @@ export class AuthEffects {
           }
         )
         .pipe(
+          tap((resData) => {
+            this.authService.setLogoutTimer(+resData.expiresIn * 1000);
+          }),
           map((resData) => {
             return handleAuthtication(resData);
           }),
@@ -100,6 +104,9 @@ export class AuthEffects {
           }
         )
         .pipe(
+          tap((resData) => {
+            this.authService.setLogoutTimer(+resData.expiresIn * 1000);
+          }),
           map((resData) => {
             return handleAuthtication(resData);
           }),
@@ -112,7 +119,7 @@ export class AuthEffects {
 
   @Effect({ dispatch: false })
   authRedirect = this.actions.pipe(
-    ofType(AuthActions.AUTHENTICATE_SUCCESS, AuthActions.LOGOUT),
+    ofType(AuthActions.AUTHENTICATE_SUCCESS),
     tap(() => {
       this.router.navigate(["/"]);
     })
@@ -140,6 +147,10 @@ export class AuthEffects {
       );
 
       if (loadedUser.token) {
+        const expirationDuration =
+          new Date(userData._tokenExpirationDate).getTime() -
+          new Date().getTime();
+        this.authService.setLogoutTimer(+expirationDuration);
         return new AuthActions.AuthenticateSuccess({
           email: loadedUser.email,
           userId: loadedUser.id,
@@ -151,8 +162,7 @@ export class AuthEffects {
         //   new Date().getTime();
         // this.autoLogout(expirationDuration);
       }
-
-      return { type: "meh" };
+      return { type: "MEH" };
     })
   );
 
@@ -161,12 +171,15 @@ export class AuthEffects {
     ofType(AuthActions.LOGOUT),
     tap(() => {
       localStorage.removeItem("userData");
+      this.authService.clearTimer();
+      this.router.navigate(["/auth"]);
     })
   );
 
   constructor(
     private actions: Actions,
     private http: HttpClient,
-    private router: Router
+    private router: Router,
+    private authService: AuthService
   ) {}
 }
