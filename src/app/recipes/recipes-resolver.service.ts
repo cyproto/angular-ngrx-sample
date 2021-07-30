@@ -8,7 +8,6 @@ import { Store } from "@ngrx/store";
 import { Actions, ofType } from "@ngrx/effects";
 
 import { Recipe } from "./recipe.model";
-import { RecipeService } from "./recipe.service";
 import * as fromApp from "../store/app.reducer";
 import * as RecipeActions from "../recipes/store/recipe.actions";
 import { map, switchMap, take } from "rxjs/operators";
@@ -37,11 +36,5 @@ export class RecipesResolverService implements Resolve<Recipe[]> {
         }
       })
     );
-
-    // if (recipes.length === 0) {
-    //   return this.dataStorageService.fetchRecipes();
-    // } else {
-    //   return recipes;
-    // }
   }
 }
